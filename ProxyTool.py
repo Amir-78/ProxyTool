@@ -124,7 +124,7 @@ def Check(ip, port, type, country, isGoogle, isHttps, google, https, count, time
     return Printer(ip, port, type, country, isGoogle, isHttps)
 
 def Printer(ip, port, type, country, isGoogle, isHttps):
-    print(Fore.CYAN + f'{type} {ip}:{port} #Country: {country} Google: {isGoogle} Https: {isHttps}')
+    print(Fore.CYAN + f'{type} {ip} {port}\n#Country: {country} Google: {isGoogle} Https: {isHttps}')
     print(Style.RESET_ALL)
     return
 
