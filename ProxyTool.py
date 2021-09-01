@@ -1,6 +1,6 @@
 #By: https://github.com/Amir-78
 
-import argparse;
+import argparse
 import requests;
 import sys;
 import urllib.request , socket
@@ -74,6 +74,25 @@ def getP(google, https, count, timeout):
                 isGoogle = True
             Filter(proxy3["ip"], proxy3["port"], proxy3["protocols"][0], proxy3["country"], isGoogle, isHttps, google, https, count, timeout)
 
+    API4 = 'https://proxylist.geonode.com/api/proxy-list?limit=50&page=1&sort_by=lastChecked&sort_type=desc&filterLastChecked=60'
+    rapi4 = requests.get(url=API4)
+    if rapi4.status_code == 200:
+        for proxy4 in rapi4.json():
+            isGoogle = False
+            isHttps = True
+
+            if proxy4["google"] == 1:
+                isGoogle = True
+
+            protocol4 = 'http'
+            if proxy4["type"] == 1:
+                protocol4 = 'http'
+            if proxy4["type"] == 2:
+                protocol4 = 'socks4'
+            if proxy4["type"] == 3:
+                protocol4 = 'socks5'
+
+            Filter(proxy4["ip"], proxy4["port"], protocol4, proxy4["country_code"], isGoogle, isHttps, google, https, count, timeout)
 
 
 
@@ -123,12 +142,15 @@ def Check(ip, port, type, country, isGoogle, isHttps, google, https, count, time
         return e.code
     except Exception as detail:
         return 1
+    global countNow
+    if countNow >= count:
+        return sys.exit()
+    countNow += 1
     return 0
 
 
 def Printer(ip, port, type, country, isGoogle, isHttps):
-    print(Fore.CYAN + f'{type} {ip} {port}\n#Country: {country} Google: {isGoogle} Https: {isHttps}')
-    print(Style.RESET_ALL)
+    print(Fore.CYAN + f'{type} {ip} {port}\n#Country: {country} Google: {isGoogle} Https: {isHttps}' + Style.RESET_ALL)
     return
 
 #Call Main Function
