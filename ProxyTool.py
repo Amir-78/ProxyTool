@@ -62,7 +62,7 @@ def getP(google, https, count, timeout):
             isHttps = True
 
         Filter(proxy2["ip"], proxy2["port"], proxy2["type"], proxy2["country"], isGoogle, isHttps, google, https, count, timeout)
-    API3 = 'https://proxylist.geonode.com/api/proxy-list?limit=50&page=1&sort_by=lastChecked&sort_type=desc&filterLastChecked=10'
+    API3 = 'https://proxylist.geonode.com/api/proxy-list?limit=50&page=1&sort_by=lastChecked&sort_type=desc&filterLastChecked=60'
     rapi3 = requests.get(url=API3)
     if rapi3.status_code == 200:
         for proxy3 in rapi3.json()["data"]:
@@ -85,20 +85,26 @@ def Filter(ip, port, type, country, isGoogle, isHttps, google, https, count, tim
         if isGoogle:
             if https:
                 if isHttps:
-                    Check(ip, port, type, country, isGoogle, isHttps, google, https, count, timeout)
-                    return
+                    if Check(ip, port, type, country, isGoogle, isHttps, google, https, count, timeout):
+                     return
+                    else:
+                        Printer(ip, port, type, country, isGoogle, isHttps)
             else:
-                Check(ip, port, type, country, isGoogle, isHttps, google, https, count, timeout)
-                return
+                if Check(ip, port, type, country, isGoogle, isHttps, google, https, count, timeout):
+                    return
+                else:
+                    Printer(ip, port, type, country, isGoogle, isHttps)
     else:
         if https:
-            if isHttps:
-                Check(ip, port, type, country, isGoogle, isHttps, google, https, count, timeout)
+            if Check(ip, port, type, country, isGoogle, isHttps, google, https, count, timeout):
                 return
+            else:
+                Printer(ip, port, type, country, isGoogle, isHttps)
         else: 
-            Check(ip, port, type, country, isGoogle, isHttps, google, https, count, timeout)
-            return
-
+            if Check(ip, port, type, country, isGoogle, isHttps, google, https, count, timeout):
+                return
+            else:
+                Printer(ip, port, type, country, isGoogle, isHttps)
 
 #Check Function
 countNow = 0
@@ -108,20 +114,17 @@ def Check(ip, port, type, country, isGoogle, isHttps, google, https, count, time
     if isHttps:
         protocol = "https"
     try:        
-        proxyH = urllib.request.ProxyHandler({f'{protocol}': f'{ip}:{port}'})        
-        OPR = urllib.request.build_opener(proxyH)
-        OPR.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.24 Safari/537.36')]
-        urllib.request.install_opener(OPR)        
-        sock=urllib.request.urlopen('http://api.ipify.org/')
+        proxy_handler = urllib.request.ProxyHandler({f'{protocol}': f'{ip}:{port}'})        
+        opener = urllib.request.build_opener(proxy_handler)
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        urllib.request.install_opener(opener)        
+        sock=urllib.request.urlopen('http://www.google.com')
     except urllib.error.HTTPError as e:        
-        return True
+        return e.code
     except Exception as detail:
-        return True
-    global countNow
-    if countNow >= count:
-        return sys.exit()
-    countNow += 1
-    return Printer(ip, port, type, country, isGoogle, isHttps)
+        return 1
+    return 0
+
 
 def Printer(ip, port, type, country, isGoogle, isHttps):
     print(Fore.CYAN + f'{type} {ip} {port}\n#Country: {country} Google: {isGoogle} Https: {isHttps}')
